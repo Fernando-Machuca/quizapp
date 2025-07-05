@@ -312,12 +312,64 @@
             50% { transform: scale(1.05); }
             100% { transform: scale(1); }
         }
+
+        .floating-menu {
+    position: fixed;
+    bottom: 30px;
+    right: 30px;
+    z-index: 999;
+}
+
+.menu-toggle {
+    background: #2563eb;
+    color: white;
+    border: none;
+    border-radius: 50%;
+    padding: 15px;
+    font-size: 20px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+    cursor: pointer;
+}
+
+.menu-content {
+    display: none;
+    flex-direction: column;
+    gap: 10px;
+    margin-top: 10px;
+    background: rgba(255,255,255,0.15);
+    backdrop-filter: blur(8px);
+    padding: 15px;
+    border-radius: 15px;
+    position: absolute;
+    bottom: 70px;
+    right: 0;
+    min-width: 180px;
+}
+
+
+.menu-item {
+    background: #1f2937;
+    color: white;
+    border: none;
+    padding: 10px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+    font-size: 14px;
+}
+
+.menu-item:hover {
+    background: #374151;
+}
+
     </style>
 </head>
 <body>
     <div class="container">
         <div class="header">
-            <h1>🎴 Tarjetas de Cuestionario</h1>
+            <h1>🎴 Quiz Cards App</h1>
             
             <div class="quiz-selector">
                 <select id="quizSelector">
@@ -329,12 +381,12 @@
             </div>
 
             <!-- Botones de respaldo y exportación -->
-            <div class="quiz-selector" style="margin-top: 15px;">
+            <!-- <div class="quiz-selector" style="margin-top: 15px;">
                 <button class="btn btn-primary" onclick="exportData()">💾 Exportar Datos</button>
                 <button class="btn btn-primary" onclick="importData()">📂 Importar Datos</button>
                 <button class="btn btn-success" onclick="saveToCloud()" id="cloudSaveBtn">☁️ Guardar en Nube</button>
                 <button class="btn btn-secondary" onclick="loadFromCloud()" id="cloudLoadBtn">☁️ Cargar de Nube</button>
-            </div>
+            </div> -->
 
             <div id="quizNameForm" class="form-overlay" style="display: none;">
                 <h3>Editar nombre del cuestionario</h3>
@@ -888,6 +940,51 @@
                 });
             });
         }
+
+        function toggleMenu() {
+    const menu = document.getElementById("menuContent");
+    menu.style.display = menu.style.display === "flex" ? "none" : "flex";
+}
+
+// Cierra el menú si haces clic fuera de él
+document.addEventListener('click', function(event) {
+    const toggleButton = document.getElementById('floatingMenu');
+    const menuContent = document.getElementById('menuContent');
+    
+    if (!toggleButton.contains(event.target)) {
+        menuContent.style.display = 'none';
+    }
+});
+
+function closeMenu() {
+    document.getElementById("menuContent").style.display = "none";
+}
+
     </script>
 </body>
+
+<!-- Menú flotante de opciones -->
+<div class="floating-menu" id="floatingMenu">
+    <button class="menu-toggle" onclick="toggleMenu()">⚙️</button>
+    <div class="menu-content" id="menuContent">
+        <button class="menu-item" onclick="exportData(); closeMenu();">
+            <span class="menu-icon">💾</span>
+            <span class="menu-text">Exportar Datos</span>
+        </button>
+        <button class="menu-item" onclick="importData(); closeMenu();">
+            <span class="menu-icon">📂</span>
+            <span class="menu-text">Importar Datos</span>
+        </button>
+        <button class="menu-item" onclick="saveToCloud(); closeMenu();" id="cloudSaveBtn">
+            <span class="menu-icon">☁️</span>
+            <span class="menu-text">Guardar en Nube</span>
+        </button>
+        <button class="menu-item" onclick="loadFromCloud(); closeMenu();" id="cloudLoadBtn">
+            <span class="menu-icon">☁️</span>
+            <span class="menu-text">Cargar de Nube</span>
+        </button>
+    </div>
+</div>
+
+
 </html>
