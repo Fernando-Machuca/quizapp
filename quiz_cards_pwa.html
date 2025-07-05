@@ -1,0 +1,704 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tarjetas de Cuestionario</title>
+    <link rel="manifest" href="data:application/json;base64,eyJuYW1lIjoiVGFyamV0YXMgZGUgQ3Vlc3Rpb25hcmlvIiwic2hvcnRfbmFtZSI6IlF1aXpDYXJkcyIsInN0YXJ0X3VybCI6Ii8iLCJkaXNwbGF5Ijoic3RhbmRhbG9uZSIsImJhY2tncm91bmRfY29sb3IiOiIjMzYzNzk2IiwidGhlbWVfY29sb3IiOiIjMzYzNzk2IiwiaWNvbnMiOlt7InNyYyI6ImRhdGE6aW1hZ2Uvc3ZnK3htbDtiYXNlNjQsUEhOMlp5QjNhV1IwYUQwaU1USTRJaUJvWldsbmFIUTlJakV5T0NJZ2RtbGxkMEp2ZUQwaU1DQXdJREV5T0NBeU9DSWdabWxzYkQwaUl6TTJNemM1TmlJK1BISmxZM1FnZUQwaU1Ua2lJSGs5SWpFNUlpQjNhV1IwYUQwaU9UQWlJR2hsYVdkb2REb2lPVEFpSUhKNFBTSTFJaUJtYVd4c1BTSWpabVptSWk4K1BIUmxlSFFnZUQwaU5qUWlJSGs5SWpVd0lpQm1hV3hzUFNJamJtNXVJaUJtYjI1MExYTnBlbVU5SWpJd2NuZ2lQaUFxUEM5MFpYaDBQand2YzNablBnPT0iLCJzaXplcyI6IjEyOHgxMjgiLCJ0eXBlIjoiaW1hZ2Uvc3ZnK3htbCJ9XX0=">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: white;
+            overflow-x: hidden;
+        }
+
+        .container {
+            max-width: 100%;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 20px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .quiz-selector {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .quiz-selector select {
+            padding: 12px 20px;
+            border-radius: 10px;
+            border: none;
+            background: rgba(255,255,255,0.1);
+            color: white;
+            font-size: 16px;
+            min-width: 200px;
+        }
+
+        .quiz-selector select option {
+            color: #333;
+        }
+
+        .btn {
+            padding: 12px 20px;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.3s ease;
+            background: rgba(255,255,255,0.1);
+            color: white;
+            backdrop-filter: blur(10px);
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+        }
+
+        .btn:active {
+            transform: translateY(0);
+        }
+
+        .btn-primary { background: #3b82f6; }
+        .btn-success { background: #10b981; }
+        .btn-danger { background: #ef4444; }
+        .btn-warning { background: #f59e0b; }
+        .btn-secondary { background: #6b7280; }
+
+        .card {
+            background: rgba(255,255,255,0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 40px;
+            margin-bottom: 30px;
+            min-height: 400px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            border: 1px solid rgba(255,255,255,0.2);
+        }
+
+        .card-content {
+            text-align: center;
+            width: 100%;
+        }
+
+        .card-content h2 {
+            font-size: 2rem;
+            line-height: 1.5;
+            margin-bottom: 20px;
+        }
+
+        .audio-controls {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            display: flex;
+            gap: 10px;
+        }
+
+        .controls {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .control-buttons {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .navigation {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+        }
+
+        .nav-btn {
+            padding: 15px 30px;
+            font-size: 18px;
+            border-radius: 15px;
+        }
+
+        .nav-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .progress-dots {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-top: 20px;
+        }
+
+        .dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.3);
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .dot.active {
+            background: white;
+            transform: scale(1.2);
+        }
+
+        .form-overlay {
+            background: rgba(255,255,255,0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 20px;
+            border: 1px solid rgba(255,255,255,0.2);
+        }
+
+        .form-overlay input,
+        .form-overlay textarea {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid rgba(255,255,255,0.2);
+            border-radius: 10px;
+            background: rgba(255,255,255,0.1);
+            color: white;
+            font-size: 16px;
+            margin-bottom: 15px;
+        }
+
+        .form-overlay input::placeholder,
+        .form-overlay textarea::placeholder {
+            color: rgba(255,255,255,0.6);
+        }
+
+        .form-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .counter {
+            font-size: 18px;
+            font-weight: bold;
+            color: rgba(255,255,255,0.8);
+            margin-bottom: 15px;
+        }
+
+        .footer-info {
+            text-align: center;
+            margin-top: 30px;
+            color: rgba(255,255,255,0.7);
+        }
+
+        .footer-info p {
+            margin-bottom: 8px;
+        }
+
+        .playing-indicator {
+            color: #fbbf24;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 15px;
+            }
+
+            .header h1 {
+                font-size: 2rem;
+            }
+
+            .card {
+                padding: 25px;
+                min-height: 300px;
+            }
+
+            .card-content h2 {
+                font-size: 1.5rem;
+            }
+
+            .quiz-selector {
+                flex-direction: column;
+                align-items: center;
+            }
+
+            .quiz-selector select {
+                min-width: 280px;
+            }
+
+            .control-buttons {
+                flex-direction: column;
+                width: 100%;
+            }
+
+            .btn {
+                width: 100%;
+                justify-content: center;
+            }
+
+            .navigation {
+                flex-direction: column;
+                width: 100%;
+            }
+
+            .nav-btn {
+                width: 100%;
+                justify-content: center;
+            }
+        }
+
+        .edit-area {
+            width: 100%;
+            max-width: 600px;
+        }
+
+        .edit-area textarea {
+            min-height: 120px;
+            resize: vertical;
+        }
+
+        /* Animaciones */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .card {
+            animation: fadeIn 0.5s ease-out;
+        }
+
+        .pulse {
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🎴 Tarjetas de Cuestionario</h1>
+            
+            <div class="quiz-selector">
+                <select id="quizSelector">
+                    <option value="0">Mi Primer Cuestionario</option>
+                </select>
+                <button class="btn btn-warning" onclick="editQuizName()">✏️ Editar</button>
+                <button class="btn btn-success" onclick="showNewQuizForm()">➕ Nuevo</button>
+                <button class="btn btn-danger" onclick="deleteQuiz()">🗑️ Eliminar</button>
+            </div>
+
+            <div id="quizNameForm" class="form-overlay" style="display: none;">
+                <h3>Editar nombre del cuestionario</h3>
+                <input type="text" id="quizNameInput" placeholder="Nombre del cuestionario">
+                <div class="form-buttons">
+                    <button class="btn btn-success" onclick="saveQuizName()">💾 Guardar</button>
+                    <button class="btn btn-secondary" onclick="cancelQuizNameEdit()">✖️ Cancelar</button>
+                </div>
+            </div>
+
+            <div id="newQuizForm" class="form-overlay" style="display: none;">
+                <input type="text" id="newQuizInput" placeholder="Nombre del cuestionario">
+                <div class="form-buttons">
+                    <button class="btn btn-success" onclick="createNewQuiz()">💾 Crear</button>
+                    <button class="btn btn-secondary" onclick="cancelNewQuiz()">✖️ Cancelar</button>
+                </div>
+            </div>
+
+            <div id="newQuestionForm" class="form-overlay" style="display: none;">
+                <h3>Agregar nueva pregunta</h3>
+                <textarea id="newQuestionInput" placeholder="Escribe tu nueva pregunta..."></textarea>
+                <div class="form-buttons">
+                    <button class="btn btn-success" onclick="saveNewQuestion()">💾 Guardar</button>
+                    <button class="btn btn-secondary" onclick="cancelNewQuestion()">✖️ Cancelar</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="audio-controls">
+                <button class="btn btn-primary" onclick="speakCurrentQuestion()" id="playBtn">🔊</button>
+                <button class="btn btn-danger" onclick="stopSpeaking()" id="stopBtn">⏸️</button>
+            </div>
+
+            <div class="card-content">
+                <div id="questionDisplay">
+                    <h2 id="currentQuestion">¿Cuál es tu nombre?</h2>
+                    <div id="playingIndicator" class="playing-indicator" style="display: none;">
+                        ▶️ Reproduciendo...
+                    </div>
+                </div>
+
+                <div id="editForm" class="edit-area" style="display: none;">
+                    <textarea id="editQuestionInput" placeholder="Escribe tu pregunta..."></textarea>
+                    <div class="form-buttons">
+                        <button class="btn btn-success" onclick="saveEdit()">💾 Guardar</button>
+                        <button class="btn btn-secondary" onclick="cancelEdit()">✖️ Cancelar</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="controls">
+            <div class="counter" id="counter">1 / 5</div>
+            
+            <div class="control-buttons">
+                <button class="btn btn-success" onclick="showNewQuestionForm()">➕ Agregar</button>
+                <button class="btn btn-primary" onclick="editCurrentQuestion()">✏️ Editar</button>
+                <button class="btn btn-danger" onclick="deleteCurrentQuestion()">🗑️ Eliminar</button>
+            </div>
+
+            <div class="navigation">
+                <button class="btn nav-btn" onclick="prevCard()" id="prevBtn">⬅️ Anterior</button>
+                <button class="btn nav-btn" onclick="nextCard()" id="nextBtn">Siguiente ➡️</button>
+            </div>
+        </div>
+
+        <div class="progress-dots" id="progressDots">
+            <div class="dot active" onclick="goToCard(0)"></div>
+            <div class="dot" onclick="goToCard(1)"></div>
+            <div class="dot" onclick="goToCard(2)"></div>
+            <div class="dot" onclick="goToCard(3)"></div>
+            <div class="dot" onclick="goToCard(4)"></div>
+        </div>
+
+        <div class="footer-info">
+            <p>📝 Cuestionario: <span id="currentQuizName">Mi Primer Cuestionario</span></p>
+            <p>💡 Tip: Las preguntas se reproducen automáticamente al cambiar de tarjeta</p>
+        </div>
+    </div>
+
+    <script>
+        // Estado de la aplicación
+        let quizzes = [
+            {
+                id: 1,
+                name: 'Mi Primer Cuestionario',
+                questions: [
+                    '¿Cuál es tu nombre?',
+                    '¿De dónde eres?',
+                    '¿Cuál es tu color favorito?',
+                    '¿Cuál es tu comida favorita?',
+                    '¿Qué te gusta hacer en tu tiempo libre?'
+                ]
+            }
+        ];
+
+        let currentQuizIndex = 0;
+        let currentCardIndex = 0;
+        let isPlaying = false;
+        let currentSpeech = null;
+
+        // Funciones de texto a voz
+        function speakQuestion(text) {
+            if (currentSpeech) {
+                speechSynthesis.cancel();
+            }
+
+            const utterance = new SpeechSynthesisUtterance(text);
+            utterance.lang = 'es-MX';
+            utterance.rate = 0.8;
+            utterance.pitch = 1;
+            utterance.volume = 1;
+            
+            utterance.onstart = () => {
+                isPlaying = true;
+                updatePlayingIndicator();
+            };
+            
+            utterance.onend = () => {
+                isPlaying = false;
+                currentSpeech = null;
+                updatePlayingIndicator();
+            };
+            
+            utterance.onerror = () => {
+                isPlaying = false;
+                currentSpeech = null;
+                updatePlayingIndicator();
+            };
+            
+            currentSpeech = utterance;
+            speechSynthesis.speak(utterance);
+        }
+
+        function stopSpeaking() {
+            if (currentSpeech) {
+                speechSynthesis.cancel();
+                isPlaying = false;
+                currentSpeech = null;
+                updatePlayingIndicator();
+            }
+        }
+
+        function speakCurrentQuestion() {
+            const currentQuiz = quizzes[currentQuizIndex];
+            const question = currentQuiz.questions[currentCardIndex];
+            if (question) {
+                speakQuestion(question);
+            }
+        }
+
+        function updatePlayingIndicator() {
+            const indicator = document.getElementById('playingIndicator');
+            if (isPlaying) {
+                indicator.style.display = 'flex';
+                indicator.classList.add('pulse');
+            } else {
+                indicator.style.display = 'none';
+                indicator.classList.remove('pulse');
+            }
+        }
+
+        // Navegación
+        function nextCard() {
+            const currentQuiz = quizzes[currentQuizIndex];
+            if (currentCardIndex < currentQuiz.questions.length - 1) {
+                currentCardIndex++;
+                updateDisplay();
+                setTimeout(() => speakCurrentQuestion(), 500);
+            }
+        }
+
+        function prevCard() {
+            if (currentCardIndex > 0) {
+                currentCardIndex--;
+                updateDisplay();
+                setTimeout(() => speakCurrentQuestion(), 500);
+            }
+        }
+
+        function goToCard(index) {
+            currentCardIndex = index;
+            updateDisplay();
+            setTimeout(() => speakCurrentQuestion(), 500);
+        }
+
+        // Gestión de cuestionarios
+        function createNewQuiz() {
+            const name = document.getElementById('newQuizInput').value.trim();
+            if (name) {
+                const newQuiz = {
+                    id: Date.now(),
+                    name: name,
+                    questions: ['¿Cuál es tu primera pregunta?']
+                };
+                quizzes.push(newQuiz);
+                currentQuizIndex = quizzes.length - 1;
+                currentCardIndex = 0;
+                updateQuizSelector();
+                updateDisplay();
+                cancelNewQuiz();
+            }
+        }
+
+        function deleteQuiz() {
+            if (quizzes.length > 1) {
+                const currentQuiz = quizzes[currentQuizIndex];
+                if (confirm(`¿Estás seguro de que quieres eliminar el cuestionario "${currentQuiz.name}"?`)) {
+                    quizzes.splice(currentQuizIndex, 1);
+                    currentQuizIndex = Math.max(0, currentQuizIndex - 1);
+                    currentCardIndex = 0;
+                    updateQuizSelector();
+                    updateDisplay();
+                }
+            } else {
+                alert('No puedes eliminar el único cuestionario.');
+            }
+        }
+
+        function editQuizName() {
+            document.getElementById('quizNameInput').value = quizzes[currentQuizIndex].name;
+            document.getElementById('quizNameForm').style.display = 'block';
+        }
+
+        function saveQuizName() {
+            const name = document.getElementById('quizNameInput').value.trim();
+            if (name) {
+                quizzes[currentQuizIndex].name = name;
+                updateQuizSelector();
+                updateDisplay();
+                cancelQuizNameEdit();
+            }
+        }
+
+        function cancelQuizNameEdit() {
+            document.getElementById('quizNameForm').style.display = 'none';
+        }
+
+        function showNewQuizForm() {
+            document.getElementById('newQuizForm').style.display = 'block';
+        }
+
+        function cancelNewQuiz() {
+            document.getElementById('newQuizForm').style.display = 'none';
+            document.getElementById('newQuizInput').value = '';
+        }
+
+        // Gestión de preguntas
+        function showNewQuestionForm() {
+            document.getElementById('newQuestionForm').style.display = 'block';
+        }
+
+        function saveNewQuestion() {
+            const question = document.getElementById('newQuestionInput').value.trim();
+            if (question) {
+                quizzes[currentQuizIndex].questions.push(question);
+                updateDisplay();
+                cancelNewQuestion();
+            }
+        }
+
+        function cancelNewQuestion() {
+            document.getElementById('newQuestionForm').style.display = 'none';
+            document.getElementById('newQuestionInput').value = '';
+        }
+
+        function editCurrentQuestion() {
+            const currentQuiz = quizzes[currentQuizIndex];
+            const question = currentQuiz.questions[currentCardIndex];
+            document.getElementById('editQuestionInput').value = question;
+            document.getElementById('questionDisplay').style.display = 'none';
+            document.getElementById('editForm').style.display = 'block';
+        }
+
+        function saveEdit() {
+            const newQuestion = document.getElementById('editQuestionInput').value.trim();
+            if (newQuestion) {
+                quizzes[currentQuizIndex].questions[currentCardIndex] = newQuestion;
+                updateDisplay();
+                cancelEdit();
+            }
+        }
+
+        function cancelEdit() {
+            document.getElementById('questionDisplay').style.display = 'block';
+            document.getElementById('editForm').style.display = 'none';
+        }
+
+        function deleteCurrentQuestion() {
+            const currentQuiz = quizzes[currentQuizIndex];
+            if (currentQuiz.questions.length > 1) {
+                if (confirm('¿Estás seguro de que quieres eliminar esta pregunta?')) {
+                    currentQuiz.questions.splice(currentCardIndex, 1);
+                    if (currentCardIndex >= currentQuiz.questions.length) {
+                        currentCardIndex = Math.max(0, currentQuiz.questions.length - 1);
+                    }
+                    updateDisplay();
+                }
+            } else {
+                alert('No puedes eliminar la única pregunta. Agrega más preguntas primero.');
+            }
+        }
+
+        // Actualización de la interfaz
+        function updateDisplay() {
+            const currentQuiz = quizzes[currentQuizIndex];
+            const currentQuestion = currentQuiz.questions[currentCardIndex];
+            
+            document.getElementById('currentQuestion').textContent = currentQuestion;
+            document.getElementById('counter').textContent = `${currentCardIndex + 1} / ${currentQuiz.questions.length}`;
+            document.getElementById('currentQuizName').textContent = currentQuiz.name;
+            
+            // Actualizar botones de navegación
+            document.getElementById('prevBtn').disabled = currentCardIndex === 0;
+            document.getElementById('nextBtn').disabled = currentCardIndex === currentQuiz.questions.length - 1;
+            
+            // Actualizar puntos de progreso
+            updateProgressDots();
+        }
+
+        function updateProgressDots() {
+            const container = document.getElementById('progressDots');
+            const currentQuiz = quizzes[currentQuizIndex];
+            
+            container.innerHTML = '';
+            for (let i = 0; i < currentQuiz.questions.length; i++) {
+                const dot = document.createElement('div');
+                dot.className = `dot ${i === currentCardIndex ? 'active' : ''}`;
+                dot.onclick = () => goToCard(i);
+                container.appendChild(dot);
+            }
+        }
+
+        function updateQuizSelector() {
+            const selector = document.getElementById('quizSelector');
+            selector.innerHTML = '';
+            
+            quizzes.forEach((quiz, index) => {
+                const option = document.createElement('option');
+                option.value = index;
+                option.textContent = quiz.name;
+                selector.appendChild(option);
+            });
+            
+            selector.value = currentQuizIndex;
+        }
+
+        // Event listeners
+        document.getElementById('quizSelector').addEventListener('change', (e) => {
+            currentQuizIndex = parseInt(e.target.value);
+            currentCardIndex = 0;
+            updateDisplay();
+            setTimeout(() => speakCurrentQuestion(), 500);
+        });
+
+        // Inicialización
+        updateDisplay();
+        setTimeout(() => speakCurrentQuestion(), 1000);
+
+        // Registro del Service Worker para PWA
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('data:text/javascript;base64,Y29uc3QgQ0FDSEVfTkFNRSA9ICdxdWl6LWNhcmRzLXYxJzsKY29uc3QgdXJsc1RvQ2FjaGUgPSBbJy8nXTsKCnNlbGYuYWRkRXZlbnRMaXN0ZW5lcignaW5zdGFsbCcsIGZ1bmN0aW9uKGV2ZW50KSB7CiAgZXZlbnQud2FpdFVudGlsKAogICAgY2FjaGVzLm9wZW4oQ0FDSEVfTkFNRSkKICAgICAgLnRoZW4oZnVuY3Rpb24oY2FjaGUpIHsKICAgICAgICByZXR1cm4gY2FjaGUuYWRkQWxsKHVybHNUb0NhY2hlKTsKICAgICAgfSkKICApOwp9KTsKCnNlbGYuYWRkRXZlbnRMaXN0ZW5lcignZmV0Y2gnLCBmdW5jdGlvbihldmVudCkgewogIGV2ZW50LnJlc3BvbmRXaXRoKAogICAgY2FjaGVzLm1hdGNoKGV2ZW50LnJlcXVlc3QpCiAgICAgIC50aGVuKGZ1bmN0aW9uKHJlc3BvbnNlKSB7CiAgICAgICAgcmV0dXJuIHJlc3BvbnNlIHx8IGZldGNoKGV2ZW50LnJlcXVlc3QpOwogICAgICB9CiAgICAgICkKICApOwp9KTs=')
+                .then(registration => {
+                    console.log('SW registrado:', registration);
+                })
+                .catch(error => {
+                    console.log('Error al registrar SW:', error);
+                });
+            });
+        }
+    </script>
+</body>
+</html>
