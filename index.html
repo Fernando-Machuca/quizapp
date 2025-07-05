@@ -328,6 +328,14 @@
                 <button class="btn btn-danger" onclick="deleteQuiz()">🗑️ Eliminar</button>
             </div>
 
+            <!-- Botones de respaldo y exportación -->
+            <div class="quiz-selector" style="margin-top: 15px;">
+                <button class="btn btn-primary" onclick="exportData()">💾 Exportar Datos</button>
+                <button class="btn btn-primary" onclick="importData()">📂 Importar Datos</button>
+                <button class="btn btn-success" onclick="saveToCloud()" id="cloudSaveBtn">☁️ Guardar en Nube</button>
+                <button class="btn btn-secondary" onclick="loadFromCloud()" id="cloudLoadBtn">☁️ Cargar de Nube</button>
+            </div>
+
             <div id="quizNameForm" class="form-overlay" style="display: none;">
                 <h3>Editar nombre del cuestionario</h3>
                 <input type="text" id="quizNameInput" placeholder="Nombre del cuestionario">
@@ -410,24 +418,175 @@
 
     <script>
         // Estado de la aplicación
-        let quizzes = [
-            {
-                id: 1,
-                name: 'Mi Primer Cuestionario',
-                questions: [
-                    '¿Cuál es tu nombre?',
-                    '¿De dónde eres?',
-                    '¿Cuál es tu color favorito?',
-                    '¿Cuál es tu comida favorita?',
-                    '¿Qué te gusta hacer en tu tiempo libre?'
-                ]
-            }
-        ];
-
+        let quizzes = [];
         let currentQuizIndex = 0;
         let currentCardIndex = 0;
         let isPlaying = false;
         let currentSpeech = null;
+
+        // Funciones de almacenamiento
+        function saveToStorage() {
+            try {
+                const data = {
+                    quizzes: quizzes,
+                    currentQuizIndex: currentQuizIndex,
+                    currentCardIndex: currentCardIndex,
+                    lastSaved: new Date().toISOString()
+                };
+                localStorage.setItem('quizCardsApp', JSON.stringify(data));
+                console.log('Datos guardados correctamente');
+            } catch (error) {
+                console.error('Error al guardar:', error);
+            }
+        }
+
+        function loadFromStorage() {
+            try {
+                const saved = localStorage.getItem('quizCardsApp');
+                if (saved) {
+                    const data = JSON.parse(saved);
+                    quizzes = data.quizzes || [];
+                    currentQuizIndex = data.currentQuizIndex || 0;
+                    currentCardIndex = data.currentCardIndex || 0;
+                    console.log('Datos cargados correctamente');
+                    return true;
+                }
+            } catch (error) {
+                console.error('Error al cargar:', error);
+            }
+            return false;
+        }
+
+        function initializeDefaultData() {
+            quizzes = [
+                {
+                    id: 1,
+                    name: 'Mi Primer Cuestionario',
+                    questions: [
+                        '¿Cuál es tu nombre?',
+                        '¿De dónde eres?',
+                        '¿Cuál es tu color favorito?',
+                        '¿Cuál es tu comida favorita?',
+                        '¿Qué te gusta hacer en tu tiempo libre?'
+                    ]
+                }
+            ];
+            currentQuizIndex = 0;
+            currentCardIndex = 0;
+            saveToStorage();
+        }
+
+        // Funciones de respaldo en la nube (usando JSONBin.io)
+        async function saveToCloud() {
+            try {
+                const data = {
+                    quizzes: quizzes,
+                    currentQuizIndex: currentQuizIndex,
+                    currentCardIndex: currentCardIndex,
+                    lastSaved: new Date().toISOString()
+                };
+                
+                const response = await fetch('https://api.jsonbin.io/v3/b', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-Master-Key': '$2a$10$YourMasterKeyHere' // Reemplaza con tu clave real
+                    },
+                    body: JSON.stringify(data)
+                });
+                
+                if (response.ok) {
+                    const result = await response.json();
+                    localStorage.setItem('cloudBackupId', result.metadata.id);
+                    console.log('Respaldo en la nube creado');
+                    return true;
+                }
+            } catch (error) {
+                console.error('Error al crear respaldo en la nube:', error);
+            }
+            return false;
+        }
+
+        async function loadFromCloud() {
+            try {
+                const backupId = localStorage.getItem('cloudBackupId');
+                if (!backupId) return false;
+                
+                const response = await fetch(`https://api.jsonbin.io/v3/b/${backupId}/latest`, {
+                    headers: {
+                        'X-Master-Key': '$2a$10$YourMasterKeyHere' // Reemplaza con tu clave real
+                    }
+                });
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    quizzes = data.record.quizzes || [];
+                    currentQuizIndex = data.record.currentQuizIndex || 0;
+                    currentCardIndex = data.record.currentCardIndex || 0;
+                    saveToStorage(); // Guardar localmente también
+                    console.log('Datos cargados desde la nube');
+                    return true;
+                }
+            } catch (error) {
+                console.error('Error al cargar desde la nube:', error);
+            }
+            return false;
+        }
+
+        // Función para exportar datos
+        function exportData() {
+            const data = {
+                quizzes: quizzes,
+                exportDate: new Date().toISOString(),
+                version: "1.0"
+            };
+            
+            const blob = new Blob([JSON.stringify(data, null, 2)], { 
+                type: 'application/json' 
+            });
+            
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'mis_cuestionarios.json';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        }
+
+        // Función para importar datos
+        function importData() {
+            const input = document.createElement('input');
+            input.type = 'file';
+            input.accept = '.json';
+            input.onchange = function(e) {
+                const file = e.target.files[0];
+                if (file) {
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        try {
+                            const data = JSON.parse(e.target.result);
+                            if (data.quizzes && Array.isArray(data.quizzes)) {
+                                quizzes = data.quizzes;
+                                currentQuizIndex = 0;
+                                currentCardIndex = 0;
+                                saveToStorage();
+                                updateQuizSelector();
+                                updateDisplay();
+                                alert('Datos importados correctamente');
+                            } else {
+                                alert('Archivo no válido');
+                            }
+                        } catch (error) {
+                            alert('Error al leer el archivo');
+                        }
+                    };
+                    reader.readAsText(file);
+                }
+            };
+            input.click();
+        }
 
         // Funciones de texto a voz
         function speakQuestion(text) {
@@ -526,6 +685,7 @@
                 quizzes.push(newQuiz);
                 currentQuizIndex = quizzes.length - 1;
                 currentCardIndex = 0;
+                saveToStorage(); // Guardar cambios
                 updateQuizSelector();
                 updateDisplay();
                 cancelNewQuiz();
@@ -539,6 +699,7 @@
                     quizzes.splice(currentQuizIndex, 1);
                     currentQuizIndex = Math.max(0, currentQuizIndex - 1);
                     currentCardIndex = 0;
+                    saveToStorage(); // Guardar cambios
                     updateQuizSelector();
                     updateDisplay();
                 }
@@ -556,6 +717,7 @@
             const name = document.getElementById('quizNameInput').value.trim();
             if (name) {
                 quizzes[currentQuizIndex].name = name;
+                saveToStorage(); // Guardar cambios
                 updateQuizSelector();
                 updateDisplay();
                 cancelQuizNameEdit();
@@ -584,6 +746,7 @@
             const question = document.getElementById('newQuestionInput').value.trim();
             if (question) {
                 quizzes[currentQuizIndex].questions.push(question);
+                saveToStorage(); // Guardar cambios
                 updateDisplay();
                 cancelNewQuestion();
             }
@@ -606,6 +769,7 @@
             const newQuestion = document.getElementById('editQuestionInput').value.trim();
             if (newQuestion) {
                 quizzes[currentQuizIndex].questions[currentCardIndex] = newQuestion;
+                saveToStorage(); // Guardar cambios
                 updateDisplay();
                 cancelEdit();
             }
@@ -624,6 +788,7 @@
                     if (currentCardIndex >= currentQuiz.questions.length) {
                         currentCardIndex = Math.max(0, currentQuiz.questions.length - 1);
                     }
+                    saveToStorage(); // Guardar cambios
                     updateDisplay();
                 }
             } else {
@@ -684,8 +849,32 @@
         });
 
         // Inicialización
-        updateDisplay();
-        setTimeout(() => speakCurrentQuestion(), 1000);
+        function initializeApp() {
+            // Intentar cargar datos guardados
+            if (!loadFromStorage()) {
+                // Si no hay datos guardados, inicializar con datos por defecto
+                initializeDefaultData();
+            }
+            
+            // Actualizar la interfaz
+            updateQuizSelector();
+            updateDisplay();
+            
+            // Reproducir la primera pregunta después de un breve retraso
+            setTimeout(() => speakCurrentQuestion(), 1000);
+        }
+
+        // Event listeners
+        document.getElementById('quizSelector').addEventListener('change', (e) => {
+            currentQuizIndex = parseInt(e.target.value);
+            currentCardIndex = 0;
+            saveToStorage(); // Guardar el cambio de quiz
+            updateDisplay();
+            setTimeout(() => speakCurrentQuestion(), 500);
+        });
+
+        // Inicialización de la aplicación
+        initializeApp();
 
         // Registro del Service Worker para PWA
         if ('serviceWorker' in navigator) {
