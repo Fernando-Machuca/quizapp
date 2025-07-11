@@ -364,6 +364,27 @@
     background: #374151;
 }
 
+/* Código Animaciones swipe */
+/* Transiciones para swipe */
+.card.swipe-left {
+    animation: swipeLeft 0.3s ease;
+}
+
+.card.swipe-right {
+    animation: swipeRight 0.3s ease;
+}
+
+@keyframes swipeLeft {
+    0% { transform: translateX(0); opacity: 1; }
+    100% { transform: translateX(-100%); opacity: 0; }
+}
+
+@keyframes swipeRight {
+    0% { transform: translateX(0); opacity: 1; }
+    100% { transform: translateX(100%); opacity: 0; }
+}
+
+
     </style>
 </head>
 <body>
@@ -959,6 +980,47 @@ document.addEventListener('click', function(event) {
 function closeMenu() {
     document.getElementById("menuContent").style.display = "none";
 }
+
+//Agregado para función swipe
+// Deslizar entre tarjetas (mobile touch support)
+let touchStartX = 0;
+let touchEndX = 0;
+
+const cardElement = document.querySelector('.card');
+
+cardElement.addEventListener('touchstart', function (e) {
+    touchStartX = e.changedTouches[0].screenX;
+}, false);
+
+cardElement.addEventListener('touchend', function (e) {
+    touchEndX = e.changedTouches[0].screenX;
+    handleSwipeGesture();
+}, false);
+
+function handleSwipeGesture() {
+    const swipeThreshold = 50; // Sensibilidad mínima
+    const distance = touchEndX - touchStartX;
+
+    if (Math.abs(distance) > swipeThreshold) {
+        if (distance < 0) {
+            animateCardSwipe('left', nextCard);
+        } else {
+            animateCardSwipe('right', prevCard);
+        }
+    }
+}
+
+function animateCardSwipe(direction, callback) {
+    const animationClass = direction === 'left' ? 'swipe-left' : 'swipe-right';
+    cardElement.classList.add(animationClass);
+
+    setTimeout(() => {
+        cardElement.classList.remove(animationClass);
+        callback(); // Cambiar de tarjeta después de la animación
+    }, 300); // Duración de la animación
+}
+
+
 
     </script>
 </body>
